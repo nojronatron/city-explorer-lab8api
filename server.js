@@ -28,9 +28,10 @@ app.get('/', (req, res) => {
   res.status(200).send('Ehlow orld.');
 });
 
-//  photos
-app.get('/photos', (req, res) => {
+//  weather
+app.get('/weather', (req, res) => {
   //  TODO: implement this route
+  //  let wxUrl = http://localhost:3001/weather?city=${this.state.city};
   res.status(501).send('Not Implemented. Come back later.');
 });
 
