@@ -8,17 +8,16 @@ const axios = require('axios');
 
 //  globals
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3002; // added fallback port
 
 //  use
 app.use(cors());
 
 //  classes
-class Photo {
-  constructor(pic) {
-    this.src = pic.urls.regular;
-    this.alt = pic.alt_description;
-    this.artist = pic.user.name;
+class Forecast {
+  constructor(date, description) {
+    this.date = date;
+    this.description = description;
   }
 }
 
