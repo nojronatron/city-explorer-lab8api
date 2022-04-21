@@ -5,7 +5,10 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+
+//  globals
 const app = express();
+const PORT = process.env.PORT;
 
 //  use
 app.use(cors());
@@ -28,6 +31,7 @@ app.get('/', (req, res) => {
 //  photos
 app.get('/photos', (req, res) => {
   //  TODO: implement this route
+  res.status(501).send('Not Implemented. Come back later.');
 });
 
 //  catch-all route must be last
@@ -38,7 +42,7 @@ app.get('*', (req, res) => {
 //  classes
 
 //  listen
-app.listen(PORT, () => console.log('Listening on port: ${PORT}'));
+app.listen(PORT, () => console.log(`Listening on port: ${PORT}`));
 
 //  error handling
 app.use((err, req, res, next) => {
