@@ -27,7 +27,7 @@ class Movie {
   constructor(movieObj) {
     this.title = movieObj.title;
     this.overview = movieObj.overview;
-    this.image_url = movieObj.image_url;
+    this.image_url = 'https://image.tmdb.org/t/p/w500'+movieObj.poster_path;
   }
 }
 
