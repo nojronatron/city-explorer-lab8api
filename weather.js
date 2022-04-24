@@ -3,7 +3,9 @@ const axios = require('axios');
 let cache = require('./modules/cache.js');
 
 async function getWeather(lattitude, longitude) {
+  console.log('entered getWeather at ', Date.now());
   let forecasts;
+  let weatherQueryResult;
   // implement cache
   // let threeHours = 1000 * 60 * 60 * 3;
   let testExpire = 1000*30;
@@ -11,12 +13,15 @@ async function getWeather(lattitude, longitude) {
   // TODO: uncomment threeHours and assign to cacheExpire when done testing
   let cacheExpire = testExpire;
   let cacheKey = 'weather-' + lattitude + longitude;
+  console.log('date.now\tcacheExpire\tcacheKey');
+  console.log(Date.now(), cacheExpire, cacheKey);
 
-  if (cache[cacheKey] && Date.now() - cache[cacheKey].timeStamp < {cacheExpire}) {
-    console.log('cache hit!');
-    forecasts = cache[cacheKey];
+  if (cache[cacheKey] && (Date.now() - cache[cacheKey].timestamp < 30000)) {
+    console.log('cache hit! Returning cached data.');
+    weatherQueryResult = cache[cacheKey].data;
   } else {
     console.log('cache miss! Fetching update from API.');
+
     let params = {
       url: 'http://api.weatherbit.io/v2.0/forecast/daily',
       lat: lattitude,
@@ -27,11 +32,19 @@ async function getWeather(lattitude, longitude) {
     };
 
     let wxUrl = `${params.url}?lat=${params.lat}&lon=${params.lon}&days=${params.days}&units=${params.units}&key=${params.api_key}`;
-    let wxResponse = await axios.get(wxUrl);
-    let wxResData = wxResponse.data;
-    let wxResDataData = wxResData.data;
-    forecasts = wxResDataData.map((dayForecast) => new Forecast(dayForecast.datetime, dayForecast.weather.description));
+
+    // update the cache with the latest retreived data
+    cache[cacheKey] = {};
+    cache[cacheKey].timestamp = Date.now();
+    cache[cacheKey].data = await axios.get(wxUrl);
+    // end update cache
+
+    // process data for return to the caller, sending only what the client needs
+    weatherQueryResult = cache[cacheKey].data;
   }
+
+  // console.log('weatherQueryResult.data.data: ', weatherQueryResult.data.data);
+  forecasts = weatherQueryResult.data.data.map((dayForecast) => new Forecast(dayForecast.datetime, dayForecast.weather.description));
 
   return forecasts;
 }
