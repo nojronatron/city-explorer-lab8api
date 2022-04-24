@@ -1,54 +1,40 @@
 'use strict';
 
-//  requires
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const axios = require('axios');
-const { use } = require('express/lib/application');
-const getWeather = require('./weather.js');
-const getMovies = require('./movies.js');
 
-//  globals
+const weather = require('./weather.js');
+const getMovies = require('./movies.js');
 const app = express();
 const PORT = process.env.PORT || 3002; // added fallback port
 
-//  use
 app.use(cors());
 
+app.get('/weather', weatherHandler);
 
-/*  routes  */
-//  root
-app.get('/', (req, res) => {
-  res.status(420).send('Ehlow orld.');
-});
+app.get('/movies', movieHandler);
 
-//  weather
-app.get('/weather', getWeather);
+function weatherHandler(req, res) {
+  const { lat, lon } = req.query;
+  // console.log(req.query);
+  weather(lat, lon)
+    .then(summaries => res.send(summaries))
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send(error.message);
+    });
+}
 
-//  movies route
-app.get('/movies', getMovies);
-// app.get('/movies', async (req, res) => {
-//   let clientRequest = req.query.city;
-//   let movieQuery = clientRequest ? clientRequest : '';
-//   if (movieQuery.length < 1) {
-//     res.status(400).send('Input too short. Add letters, get betters.');
-//   }
-//   console.log('received query: ', movieQuery);
-//   let result = await getMovies(movieQuery);
-//   res.status(200).send(result);
-// });
+function movieHandler(req, res) {
+  const { city } = req.query;
+  // console.log('movieHandler req.query: ' + req.query);
+  getMovies(city)
+    .then(summaries => res.send(summaries))
+    .catch((err) => {
+      console.error('movieHandler.getmovies error: ', err);
+      res.status(500).send(err.message);
+    });
+}
 
-//  catch-all route must be last
-app.get('*', (req, res) => {
-  res.status(404).send('Nothing here, move along. . .');
-});
-
-//  listen
-app.listen(PORT, () => console.log(`Listening on port: ${PORT}`));
-
-//  error handling
-app.use((err, req, res, next) => {
-  console.log(err.message);
-  res.status(500).send(error.message);
-});
+app.listen(process.env.PORT, () => console.log(`Server up on ${PORT}`));

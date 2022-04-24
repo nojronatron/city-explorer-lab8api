@@ -1,30 +1,51 @@
 'use strict';
 const axios = require('axios');
+let cache = require('./modules/cache.js');
+let cacheExpire = 1000 * 60 * 60 * 3;
 
-//async function getWeather(cityName) {
-async function getWeather(req, res, next) {
-  //  TODO: verify param.city value is correct
-  try {
+async function getWeather(lattitude, longitude) {
+  // console.log('entered getWeather at ', Date.now());
+  let forecasts;
+  let weatherQueryResult;
+
+  // implement cache
+  let cacheKey = 'weather-' + lattitude + longitude;
+  // console.log('date.now\tcacheExpire\tcacheKey');
+  // console.log(Date.now(), cacheExpire, cacheKey);
+
+  if (cache[cacheKey] &&
+    (Date.now() - cache[cacheKey].timestamp < cacheExpire)) {
+    console.log('cache hit! Returning cached data.');
+    weatherQueryResult = cache[cacheKey].data;
+  } else {
+    console.log('cache miss! Fetching update from API.');
+
     let params = {
       url: 'http://api.weatherbit.io/v2.0/forecast/daily',
-      city: req.query.city,
-      country: 'US',
+      lat: lattitude,
+      lon: longitude,
       days: 3,
       units: 'S',
-      api_key: process.env.REACT_APP_WEATHERBIT_API_KEY
+      api_key: process.env.WEATHERBIT_API_KEY,
     };
-    let wxUrl = `${params.url}?city=${params.city}&country=${params.country}&days=${params.days}&units=${params.units}&key=${params.api_key}`;
-    let wxResponse = await axios.get(wxUrl);
-    let wxResData = wxResponse.data;
-    let wxResDataData = wxResData.data;
-    let forecasts = wxResDataData.map((dayForecast) => new Forecast(dayForecast.datetime, dayForecast.weather.description));
-    res.status(200).send(forecasts);
+
+    let wxUrl = `${params.url}?lat=${params.lat}&lon=${params.lon}&days=${params.days}&units=${params.units}&key=${params.api_key}`;
+
+    // update the cache with the latest retreived data
+    cache[cacheKey] = {};
+    cache[cacheKey].timestamp = Date.now();
+    cache[cacheKey].data = await axios.get(wxUrl);
+    // end update cache
+
+    // process data for return to the caller, sending only what the client needs
+    weatherQueryResult = cache[cacheKey].data;
   }
-  catch (error) {
-    Promise.resolve().then(() => {
-      throw new Error(error.message);
-    }).catch(next);
-  }
+
+  // console.log('cache[cacheKey].data: ', cache[cacheKey].data);
+  // console.log('weatherQueryResult.data.data: ', weatherQueryResult.data.data);
+  forecasts = weatherQueryResult.data.data.map((dayForecast) => new Forecast(dayForecast.datetime, dayForecast.weather.description));
+
+  return forecasts;
 }
 
 //  classes

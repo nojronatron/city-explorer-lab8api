@@ -25,6 +25,7 @@ Build an Express server that uses Axios library to make API requests for data to
 
 ## Change Log
 
+24-Apr-22 1500 PDT - Completed Lab10, implementing cache for Movie and Weather queries.
 21-Apr-22 2200 PDT - Completed building server, testing, and also refactored routes to use modularized Weather and Movies functions, and added error handling.  
 20-Apr-22 2300 PDT - Completed scaffolding server and heroku.  
 
