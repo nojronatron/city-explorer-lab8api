@@ -4,14 +4,14 @@ let cache = require('./modules/cache.js');
 let cacheExpire = 1000 * 60 * 60 * 3;
 
 async function getWeather(lattitude, longitude) {
-  console.log('entered getWeather at ', Date.now());
+  // console.log('entered getWeather at ', Date.now());
   let forecasts;
   let weatherQueryResult;
 
   // implement cache
   let cacheKey = 'weather-' + lattitude + longitude;
-  console.log('date.now\tcacheExpire\tcacheKey');
-  console.log(Date.now(), cacheExpire, cacheKey);
+  // console.log('date.now\tcacheExpire\tcacheKey');
+  // console.log(Date.now(), cacheExpire, cacheKey);
 
   if (cache[cacheKey] &&
     (Date.now() - cache[cacheKey].timestamp < cacheExpire)) {

@@ -6,8 +6,8 @@ let cacheTimeout = 1000 * 60 * 60 * 24 * 10;
 
 async function getMovies(cityName) {
   let cacheKey = process.env.MOVIE_API_KEY_THEMOVIEDB;
-  console.log('now inside getMovies.');
-  console.log('received passed-in cityName parameter: ', cityName);
+  //console.log('now inside getMovies.');
+  //console.log('received passed-in cityName parameter: ', cityName);
 
   let params = {
     url: 'https://api.themoviedb.org/3/search/movie',
@@ -32,7 +32,7 @@ async function getMovies(cityName) {
     cache[cacheKey].data = await axios.get(moviesUrl);
   }
 
-  console.log('current cache .data.config.url: ', cache[cacheKey].data.config.url);
+  //console.log('current cache .data.config.url: ', cache[cacheKey].data.config.url);
   var moviesFromCache = cache[cacheKey].data.data.results;
   // console.log('moviesFromCache: ', moviesFromCache);
   moviesArr = moviesFromCache.map(movie => {
