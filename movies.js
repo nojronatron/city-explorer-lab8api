@@ -1,7 +1,11 @@
 'use strict';
 const axios = require('axios');
+let cache = require('./modules/cache.js');
+let moviesArr;
+let cacheTimeout = 1000 * 60 * 60 * 24 * 10;
 
 async function getMovies(cityName) {
+  let cacheKey = process.env.MOVIE_API_KEY_THEMOVIEDB;
   console.log('now inside getMovies.');
   console.log('received passed-in cityName parameter: ', cityName);
 
@@ -15,28 +19,25 @@ async function getMovies(cityName) {
   };
 
   let moviesUrl = `${params.url}?api_key=${params.api_key}&query=${params.query}&${params.include_adult}`;
-  let moviesResponse = await axios.get(moviesUrl);
 
-  //  debugging
-  // let shortViewOutput = [];
-  // moviesResponse.data.results.forEach((resultProp) => {
-  //   shortViewOutput.push({
-  //     poster_path: resultProp.poster_path,
-  //     title: resultProp.title,
-  //     overview: resultProp.overview,
-  //   });
-  // });
+  //  implement cache
+  if (cache[cacheKey] &&
+        cache[cacheKey].data.config.url.includes(params.query) &&
+        (Date.now() - cache[cacheKey].timestamp < cacheTimeout)) {
+    console.log('Cache hit. Returning movies from cache.');
+  } else {
+    console.log('cache miss! Making call to remote API and refreshing cache.');
+    cache[cacheKey] = {};
+    cache[cacheKey].timestamp = Date.now();
+    cache[cacheKey].data = await axios.get(moviesUrl);
+  }
 
-  // console.dir(shortViewOutput);
-  // end debugging
-
-  let moviesArr = moviesResponse.data.results.map(movie => {
+  console.log('current cache .data.config.url: ', cache[cacheKey].data.config.url);
+  var moviesFromCache = cache[cacheKey].data.data.results;
+  // console.log('moviesFromCache: ', moviesFromCache);
+  moviesArr = moviesFromCache.map(movie => {
     return new Movie(movie);
   });
-
-  //  debugging
-  console.dir(moviesArr);
-  //  end debugging
 
   return moviesArr;
 }
